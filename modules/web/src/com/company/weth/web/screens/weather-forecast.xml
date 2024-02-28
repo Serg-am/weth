@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<window xmlns="http://schemas.haulmont.com/cuba/screen/window.xsd"
+        caption="msg://weatherForecast.caption"
+        messagesPack="com.company.weth.web.screens">
+    <data>
+        <collection id="weatherTableDc" class="com.company.weth.entity.WeatherTableItem" view="_local"/>
+
+    </data>
+    <layout>
+        <button id="getWeatherBtn"
+                caption="Получить погоду"
+                invoke="onGetWeatherBtnClick"/>
+        <table id="weatherTable"
+               dataContainer="weatherTableDc"
+               height="300px"
+               width="100%">
+            <columns>
+                <!-- Определение колонок таблицы -->
+                <column id="city" caption="Город"/>
+                <column id="dateTime" caption="Дата и время"/>
+                <column id="temperature" caption="Температура"/>
+                <column id="feelsLike" caption="Ощущаемая температура"/>
+                <column id="pressure" caption="Давление"/>
+                <column id="humidity" caption="Влажность"/>
+                <column id="description" caption="Описание"/>
+                <column id="windSpeed" caption="Скорость ветра"/>
+                <column id="windDirection" caption="Направление ветра"/>
+            </columns>
+        </table>
+    </layout>
+</window>

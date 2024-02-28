@@ -1,0 +1,10 @@
+alter table WETH_WEATHER_TABLE_ITEM rename column wind_speed to wind_speed__u60696 ;
+alter table WETH_WEATHER_TABLE_ITEM rename column humidity to humidity__u63527 ;
+alter table WETH_WEATHER_TABLE_ITEM rename column pressure to pressure__u10206 ;
+alter table WETH_WEATHER_TABLE_ITEM rename column feels_like to feels_like__u96554 ;
+alter table WETH_WEATHER_TABLE_ITEM rename column temperature to temperature__u03108 ;
+alter table WETH_WEATHER_TABLE_ITEM add column TEMPERATURE double precision ;
+alter table WETH_WEATHER_TABLE_ITEM add column FEELS_LIKE double precision ;
+alter table WETH_WEATHER_TABLE_ITEM add column PRESSURE double precision ;
+alter table WETH_WEATHER_TABLE_ITEM add column HUMIDITY integer ;
+alter table WETH_WEATHER_TABLE_ITEM add column WIND_SPEED double precision ;

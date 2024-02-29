@@ -32,6 +32,12 @@ public class WeatherTableItem extends StandardEntity {
     @Column(name = "DESCRIPTION")
     protected String description;
 
+    @Column(name = "WIND_SPEED")
+    protected Double windSpeed;
+
+    @Column(name = "WIND_DIRECTION")
+    protected String windDirection;
+
     public String getCity() {
         return city;
     }
@@ -103,12 +109,5 @@ public class WeatherTableItem extends StandardEntity {
     public void setWindDirection(String windDirection) {
         this.windDirection = windDirection;
     }
-
-    @Column(name = "WIND_SPEED")
-    protected Double windSpeed;
-
-    @Column(name = "WIND_DIRECTION")
-    protected String windDirection;
-
 
 }

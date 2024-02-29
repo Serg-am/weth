@@ -4,7 +4,9 @@ import com.company.weth.WeatherService;
 import com.company.weth.entity.WeatherTableItem;
 import com.haulmont.cuba.core.global.DataManager;
 import com.haulmont.cuba.gui.components.Button;
+import com.haulmont.cuba.gui.components.Label;
 import com.haulmont.cuba.gui.components.Table;
+import com.haulmont.cuba.gui.components.TextField;
 import com.haulmont.cuba.gui.model.CollectionContainer;
 import com.haulmont.cuba.gui.screen.Screen;
 import com.haulmont.cuba.gui.screen.UiController;
@@ -25,12 +27,19 @@ public class WeatherForecast extends Screen {
     private CollectionContainer<WeatherTableItem> weatherTableDc;
     @Inject
     private WeatherService weatherService;
+    @Inject
+    private TextField<String> cityField;
 
+    @Inject
+    private Label<String> currentWeatherLabel;
     public void onGetWeatherBtnClick() {
-        String city = "Moscow"; // Получите город из формы, если необходимо
+        String city = cityField.getValue();
         clearTable();
         String weatherForecast = weatherService.getWeatherForecast(city);
         addWeatherForecastToTable(weatherForecast);
+
+        String currentWeather = weatherService.getCurrentWeather(city);
+        currentWeatherLabel.setValue(currentWeather);
     }
 
     private void clearTable() {
@@ -40,7 +49,6 @@ public class WeatherForecast extends Screen {
     private void addWeatherForecastToTable(String forecastData) {
         System.out.println(forecastData);
         int index = forecastData.indexOf(":");
-        // Если найден пробел, извлекаем первое слово
         String city = index != -1 ? forecastData.substring(0, index) : forecastData;
         String modifiedText = forecastData.replace(city + ":\n", "");
         String[] rows = modifiedText.split("\n\n");
@@ -52,20 +60,15 @@ public class WeatherForecast extends Screen {
     }
     private String[] parseWeatherInfo(String weatherInfo) {
         String[] lines = weatherInfo.split("\n");
-        String[] data = new String[8]; // Массив для хранения разобранных данных
-        int index = 0; // Индекс для заполнения массива данных
+        String[] data = new String[8];
+        int index = 0;
 
-        // Обработка первой строки
         String[] firstLineParts = lines[0].split(" ");
         data[index++] = firstLineParts[0] + " " + firstLineParts[1]; // Добавляем дату и время
 
-        // Обработка остальных строк
         for (int i = 1; i < lines.length; i++) {
-            // Разбиваем строку по двоеточию и извлекаем вторую часть (значение)
             String[] parts = lines[i].split(":");
-            // Удаляем лишние пробелы из начала и конца строки, а также символ градуса, если присутствует
             String value = parts[1].trim().replaceAll("°C", "").replaceAll("hPa", "").replaceAll("%", "").replaceAll("м/с", "");
-            // Добавляем значение в массив данных
             data[index++] = value;
         }
 

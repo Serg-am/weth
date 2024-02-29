@@ -3,12 +3,17 @@
         caption="msg://weatherForecast.caption"
         messagesPack="com.company.weth.web.screens">
     <data>
-        <collection id="weatherTableDc" class="com.company.weth.entity.WeatherTableItem" view="_local"/>
-
+        <collection id="weatherTableItemsDc" class="com.company.weth.entity.WeatherTableItem" view="_local"/>
     </data>
     <layout>
         <vbox spacing="true">
         <textField id="cityField" caption="Город"/>
+        <groupBox id="dateFieldsGroupBox" caption="Выберите даты">
+            <hbox spacing="true">
+                <dateField id="startDateField" caption="Начальная дата"/>
+                <dateField id="endDateField" caption="Конечная дата"/>
+            </hbox>
+        </groupBox>
         <button id="getWeatherBtn"
                 caption="Получить погоду"
                 invoke="onGetWeatherBtnClick"/>
@@ -19,14 +24,14 @@
                align="MIDDLE_CENTER"/>
         </vbox>
         <table id="weatherTable"
-               dataContainer="weatherTableDc"
+               dataContainer="weatherTableItemsDc"
                height="300px"
                width="100%">
             <columns>
                 <column id="city" caption="Город"/>
                 <column id="dateTime" caption="Дата и время"/>
                 <column id="temperature" caption="Температура, °C"/>
-                <column id="feelsLike" caption="Температура, ощущение °C"/>
+                <column id="feelsLike" caption="Температура ощущения, °C"/>
                 <column id="pressure" caption="Давление, hPa"/>
                 <column id="humidity" caption="Влажность, %"/>
                 <column id="description" caption="Описание"/>

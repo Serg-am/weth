@@ -2,5 +2,6 @@
 <menu-config xmlns="http://schemas.haulmont.com/cuba/menu.xsd">
     <menu id="application-weth" insertBefore="administration" caption="mainMsg://menu_config.application-weth">
         <item screen="weth_WeatherForecast" caption="mainMsg://menu_config.weth_WeatherForecast"/>
+        <item screen="weth_WeatherScreenDate" caption="mainMsg://menu_config.weth_WeatherScreenDate"/>
     </menu>
 </menu-config>

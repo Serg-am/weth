@@ -1,10 +1,12 @@
 package com.company.weth;
 
 import com.company.weth.entity.WeatherTableItem;
+import com.esotericsoftware.minlog.Log;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.haulmont.cuba.core.global.DataManager;
+import groovy.util.logging.Slf4j;
 import org.springframework.stereotype.Service;
 
 import javax.inject.Inject;
@@ -21,6 +23,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
+@Slf4j
 @Service("weatherService")
 public class WeatherService {
     private static final String API_KEY = "22ebcb3caabd888803c94ede901228ed";
@@ -31,11 +34,12 @@ public class WeatherService {
     @Inject
     protected DataManager dataManager;
 
+    // Сохраняет данные о погоде в базу данных
     public void saveWeatherBD(String city, String dateTime, double temperature, double feelLike, double pressure,
                               int humidity, String description, double windSpeed, String windDirection){
         dataManager.commit(createWeatherTable(city, dateTime, temperature, feelLike, pressure, humidity, description, windSpeed, windDirection));
     }
-
+    // Создает и наполняет сущность
     private WeatherTableItem createWeatherTable(String city, String dateTime, double temperature, double feelLike, double pressure, int humidity, String description, double windSpeed, String windDirection) {
         WeatherTableItem weatherTableItem = dataManager.create(WeatherTableItem.class);
         weatherTableItem.setCity(city);
@@ -50,17 +54,19 @@ public class WeatherService {
         return weatherTableItem;
     }
 
+    // Получает прогноз погоды для указанного города
     public String getWeatherForecast(String city) {
         try {
             String jsonRawData = downloadJsonRawData("forecast", city);
             List<String> linesOfForecast = convertRawDataToList(jsonRawData);
             return String.format("%s:%s%s", city, System.lineSeparator(), parseForecastDataFromList(linesOfForecast, city));
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error("В данный момент погодный сервис не работает" + e.getMessage());
             return "В данный момент погодный сервис не работает, пожалуйста, попробуйте позже.";
         }
     }
 
+    // Получает прогноз погоды для указанного города (в данный момент)
     public String getCurrentWeather(String city) {
         try {
             ObjectMapper objectMapper = new ObjectMapper();
@@ -69,22 +75,24 @@ public class WeatherService {
             String jsonRawData = downloadJsonRawData("weather", city);
             return parseJsonNode(jsonRawData, city, objectMapper, formattedDateTime);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error("В данный момент погодный сервис не работает" + e.getMessage());
             return "В данный момент погодный сервис не работает, пожалуйста, попробуйте позже.";
         }
     }
 
+    // Получает данные о погоде в заданном диапазоне дат для указанного города
     public List<WeatherTableItem> getWeatherForDate(String city, LocalDate startDate, LocalDate endDate) {
         try {
             String jsonRawData = downloadJsonRawData("forecast", city);
             return parseWeatherDataForDateRange(jsonRawData, city, startDate, endDate);
         } catch (Exception e) {
-            e.printStackTrace();
+            Log.error(e.getMessage());
             return new ArrayList<>();
         }
     }
 
 
+    // Загружает сырые данные JSON о погоде с акуВезер
     private String downloadJsonRawData(String endpoint, String city) throws Exception {
         String urlString = BASE_URL + endpoint + "?q=" + city + "&appid=" + API_KEY;
         URL urlObject = new URL(urlString);
@@ -104,6 +112,7 @@ public class WeatherService {
     }
 
 
+    // Преобразует сырые данные JSON в список прогнозов погоды
     private List<String> convertRawDataToList(String data) throws Exception {
         List<String> weatherList = new ArrayList<>();
 
@@ -119,6 +128,7 @@ public class WeatherService {
         return weatherList;
     }
 
+    // Извлекает данные из списка прогнозов погоды и форматирует их
     private String parseForecastDataFromList(List<String> weatherList, String city) throws Exception {
         StringBuilder sb = new StringBuilder();
 
@@ -131,6 +141,8 @@ public class WeatherService {
         }
         return sb.toString();
     }
+
+    // Извлекает данные из JSON и формирует сообщение о погоде
     private String parseJsonNode(String jsonData, String city, ObjectMapper objectMapper, String formattedDateTime) throws JsonProcessingException {
         JsonNode mainNode = objectMapper.readTree(jsonData).get("main");
         double temperature = mainNode.get("temp").asDouble() - 273.15;
@@ -152,12 +164,15 @@ public class WeatherService {
                 formattedDateTime, temperature, feelsLike, pressure, humidity, description, windSpeed, windDirection);
     }
 
+
+    // Определяет направление ветра по градусам
     private String determineWindDirection(double degree) {
         String[] directions = {"С", "ССЗ", "СЗ", "ЗСЗ", "З", "ЗЮЗ", "ЮЗ", "ЮЮЗ", "Ю", "ЮЮВ", "ЮВ", "ВЮВ", "В", "ВСВ", "СВ", "ССВ"};
         int index = (int) Math.round(((degree % 360) / 22.5));
         return directions[index % 16];
     }
 
+    // Извлекает данные о погоде в заданном диапазоне дат из JSON. Тут еще нужно убрать дублирование кода
     public List<WeatherTableItem> parseWeatherDataForDateRange(String jsonData, String city, LocalDate startDate, LocalDate endDate) throws Exception {
         List<WeatherTableItem> weatherItems = new ArrayList<>();
         ObjectMapper objectMapper = new ObjectMapper();

@@ -46,8 +46,8 @@ public class WeatherForecast extends Screen {
         weatherTableDc.getMutableItems().clear();
     }
 
+    // Метод для добавления прогноза погоды в таблицу
     private void addWeatherForecastToTable(String forecastData) {
-        System.out.println(forecastData);
         int index = forecastData.indexOf(":");
         String city = index != -1 ? forecastData.substring(0, index) : forecastData;
         String modifiedText = forecastData.replace(city + ":\n", "");
@@ -58,13 +58,14 @@ public class WeatherForecast extends Screen {
             weatherTableDc.getMutableItems().add(item);
         }
     }
+    // Метод для разбора строки с информацией о погоде
     private String[] parseWeatherInfo(String weatherInfo) {
         String[] lines = weatherInfo.split("\n");
         String[] data = new String[8];
         int index = 0;
 
         String[] firstLineParts = lines[0].split(" ");
-        data[index++] = firstLineParts[0] + " " + firstLineParts[1]; // Добавляем дату и время
+        data[index++] = firstLineParts[0] + " " + firstLineParts[1];
 
         for (int i = 1; i < lines.length; i++) {
             String[] parts = lines[i].split(":");
@@ -75,6 +76,7 @@ public class WeatherForecast extends Screen {
         return data;
     }
 
+    // Метод для создания объекта WeatherTableItem на основе данных о погоде. В WeatherScreenDate последние методы ушли в сервис
     private WeatherTableItem createWeatherTableItem(String city, String[] data) {
         WeatherTableItem item = dataManager.create(WeatherTableItem.class);
         item.setCity(city);

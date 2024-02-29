@@ -28,11 +28,15 @@ import java.util.Locale;
 public class WeatherService {
     private static final String API_KEY = "22ebcb3caabd888803c94ede901228ed";
     private static final String BASE_URL = "https://api.openweathermap.org/data/2.5/";
-
-    private final static DateTimeFormatter INPUT_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
     private final static DateTimeFormatter OUTPUT_DATE_TIME_FORMAT = DateTimeFormatter.ofPattern("MMM-dd HH:mm", Locale.US);
     @Inject
     protected DataManager dataManager;
+
+    public List<WeatherTableItem> getWeatherForecastForDays(String city, int numberOfDays) {
+        LocalDate startDate = LocalDate.now();
+        LocalDate endDate = startDate.plusDays(numberOfDays);
+        return getWeatherForDate(city, startDate, endDate);
+    }
 
     // Сохраняет данные о погоде в базу данных
     public void saveWeatherBD(String city, String dateTime, double temperature, double feelLike, double pressure,
@@ -52,18 +56,6 @@ public class WeatherService {
         weatherTableItem.setWindSpeed(windSpeed);
         weatherTableItem.setWindDirection(windDirection);
         return weatherTableItem;
-    }
-
-    // Получает прогноз погоды для указанного города
-    public String getWeatherForecast(String city) {
-        try {
-            String jsonRawData = downloadJsonRawData("forecast", city);
-            List<String> linesOfForecast = convertRawDataToList(jsonRawData);
-            return String.format("%s:%s%s", city, System.lineSeparator(), parseForecastDataFromList(linesOfForecast, city));
-        } catch (Exception e) {
-            Log.error("В данный момент погодный сервис не работает" + e.getMessage());
-            return "В данный момент погодный сервис не работает, пожалуйста, попробуйте позже.";
-        }
     }
 
     // Получает прогноз погоды для указанного города (в данный момент)
@@ -91,7 +83,6 @@ public class WeatherService {
         }
     }
 
-
     // Загружает сырые данные JSON о погоде с акуВезер
     private String downloadJsonRawData(String endpoint, String city) throws Exception {
         String urlString = BASE_URL + endpoint + "?q=" + city + "&appid=" + API_KEY;
@@ -109,37 +100,6 @@ public class WeatherService {
             }
             return response.toString();
         }
-    }
-
-
-    // Преобразует сырые данные JSON в список прогнозов погоды
-    private List<String> convertRawDataToList(String data) throws Exception {
-        List<String> weatherList = new ArrayList<>();
-
-        JsonNode arrNode = new ObjectMapper().readTree(data).get("list");
-        if (arrNode.isArray()) {
-            for (final JsonNode objNode : arrNode) {
-                String forecastTime = objNode.get("dt_txt").toString();
-                if (forecastTime.contains("12:00")) {
-                    weatherList.add(objNode.toString());
-                }
-            }
-        }
-        return weatherList;
-    }
-
-    // Извлекает данные из списка прогнозов погоды и форматирует их
-    private String parseForecastDataFromList(List<String> weatherList, String city) throws Exception {
-        StringBuilder sb = new StringBuilder();
-
-        for (String line : weatherList) {
-            ObjectMapper objectMapper = new ObjectMapper();
-            String dateTime = objectMapper.readTree(line).get("dt_txt").asText();
-            LocalDateTime forecastDateTime = LocalDateTime.parse(dateTime, INPUT_DATE_TIME_FORMAT);
-            String formattedDateTime = forecastDateTime.format(OUTPUT_DATE_TIME_FORMAT);
-            sb.append(parseJsonNode(line, city, objectMapper, formattedDateTime));
-        }
-        return sb.toString();
     }
 
     // Извлекает данные из JSON и формирует сообщение о погоде
@@ -163,7 +123,6 @@ public class WeatherService {
         return String.format("%s%nТемпература: %.1f °C%nТемпература 'как ощущается': %.1f °C%nДавление: %.1f hPa%nВлажность: %d%%%nОписание: %s%nСкорость ветра: %.1f м/с%nНаправление ветра: %s%n%n",
                 formattedDateTime, temperature, feelsLike, pressure, humidity, description, windSpeed, windDirection);
     }
-
 
     // Определяет направление ветра по градусам
     private String determineWindDirection(double degree) {
@@ -203,8 +162,6 @@ public class WeatherService {
                 weatherItems.add(createWeatherTable(city, formattedDateTime, temperature, feelsLike, pressure, humidity, description, windSpeed, windDirection));
             }
         }
-
         return weatherItems;
     }
-
 }

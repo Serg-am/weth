@@ -24,26 +24,18 @@ public class WeatherScreenDate extends Screen {
 
     @Inject
     private TextField<String> cityField;
-
     @Inject
     private DateField<Date> startDateField;
-
     @Inject
     private DateField<Date> endDateField;
-
     @Inject
     private Table<WeatherTableItem> weatherTable;
-
     @Inject
     private Button getWeatherBtn;
-
     @Inject
     private WeatherService weatherService;
-
     @Inject
     private CollectionContainer<WeatherTableItem> weatherTableItemsDc;
-
-
     @Inject
     private Label<String> currentWeatherLabel;
 
@@ -51,7 +43,6 @@ public class WeatherScreenDate extends Screen {
         String city = cityField.getValue();
         LocalDate startDate = startDateField.getValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
         LocalDate endDate = endDateField.getValue().toInstant().atZone(ZoneId.systemDefault()).toLocalDate();
-
 
         if (city != null && startDate != null && endDate != null) {
             List<WeatherTableItem> weatherData = weatherService.getWeatherForDate(city, startDate, endDate);

@@ -83,7 +83,7 @@ public class WeatherService {
         }
     }
 
-    // Загружает сырые данные JSON о погоде с акуВезер
+    // Загружает сырые данные JSON о погоде с опенВезер
     private String downloadJsonRawData(String endpoint, String city) throws Exception {
         String urlString = BASE_URL + endpoint + "?q=" + city + "&appid=" + API_KEY;
         URL urlObject = new URL(urlString);
